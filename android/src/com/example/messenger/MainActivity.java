@@ -8,12 +8,15 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 public class MainActivity extends Activity {
@@ -29,7 +32,7 @@ public class MainActivity extends Activity {
 	private static final String TAG_USR = "usr";
 	private static final String TAG_LOGIN = "login";
 	private static final String TAG_PASSWORD = "password";
-
+	private boolean success = false;
 	//url for the sign in page.
 	private static String url_user_sign = "http://169.235.215.105/user_signin.php";
 	
@@ -43,10 +46,32 @@ public class MainActivity extends Activity {
     	
     	login = current.getStringExtra(TAG_LOGIN);
     	
-    	//Just sets the values to the username and passwords
-    	mUserName = (EditText) findViewById(R.id.userSigninName);
-    	mUserPassword = (EditText) findViewById(R.id.userSigninPassword);
+    	Button mSignin = (Button) findViewById(R.id.userSigninName);
+    	Button mNewUser = (Button) findViewById(R.id.createNewUser);
     	
+    	mSignin.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				new SignIn().execute();
+				
+				if(success){
+					Intent mUserHome = new Intent(getApplicationContext(), UserHomeScreen.class);
+					startActivity(mUserHome);
+				}
+			}
+		});
+    	
+    	mNewUser.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent newUser = new Intent(getApplicationContext(),NewUser.class);
+				startActivity(newUser);
+			}
+		});
     	//need an onclick listerner for the button sigin
     	
     }
@@ -69,6 +94,15 @@ public class MainActivity extends Activity {
 			mDialog.show();
 		}
 		
+		//Function to check is the usernames and passwords match
+		private boolean isValidUser(EditText mUserName,
+				EditText mUserPassword, String userName, String pass) {
+			// TODO Auto-generated method stub
+			
+			
+			
+			return false;
+		}		
 		@Override
 		protected String doInBackground(String... args) {
 			runOnUiThread(new Runnable() {
@@ -95,17 +129,28 @@ public class MainActivity extends Activity {
 							JSONArray usrObj = json.getJSONArray(TAG_USR); // JSON Array
 							
 							// get first product object from JSON Array
-							JSONObject product = usrObj.getJSONObject(0);
-
-							// product with this pid found
-							// Edit Text
+							JSONObject usrInfo = usrObj.getJSONObject(0);
+							
+					    	//Just sets the values to the username and passwords
+					    	mUserName = (EditText) findViewById(R.id.userSigninName);
+					    	mUserPassword = (EditText) findViewById(R.id.userSigninPassword);
+					    	
+							String userName = usrInfo.getString(TAG_LOGIN);
+					    	String pass = usrInfo.getString(TAG_PASSWORD);
+					    	
+							//need to check if the username and password are correct
+					    	
+							if(isValidUser(mUserName,mUserPassword,userName,pass)){
+								
+							}
+					    	/*
 							txtName = (EditText) findViewById(R.id.inputName);
 							txtPrice = (EditText) findViewById(R.id.inputPrice);
 							txtDesc = (EditText) findViewById(R.id.inputDesc);
 
 							// display product data in EditText
 							txtName.setText(product.getString(TAG_LOGIN));
-							txtPrice.setText(product.getString(TAG_PASSWORD));
+							txtPrice.setText(product.getString(TAG_PASSWORD));*/
 
 						}else{
 							// product with pid not found
@@ -114,6 +159,8 @@ public class MainActivity extends Activity {
 						e.printStackTrace();
 					}
 				}
+
+
 			});
 
 			return null;
