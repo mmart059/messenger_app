@@ -1,4 +1,5 @@
 **** TESTING ****
+
 Make sure to download and setup a WAMP server. You basically have to google WAMP server and the first or second link should have access to a page where you can download the installer.
 
 Make sure to fill out localhost where it asks you to fill in something along with your email. If you are unsure, you can always google how to install wamp on google.
