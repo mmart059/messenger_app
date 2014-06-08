@@ -1,0 +1,22 @@
+      public static void ReadNotifications(Messenger esql){
+      // Your code goes here.
+      try{
+          String query = String.format("SELECT M.msg_id, M.msg_timestamp, M.sender_login, M.msg_text FROM notification N, Message M WHERE N.usr_login = '%s' AND N.msg_id = M.msg_id", SUPER_USER); 
+          esql.executeQueryAndPrintResult(query);
+          
+          query = String.format("SELECT N.msg_id FROM notification N, message M WHERE N.msg_id = M.msg_id AND  N.usr_login = '%s'", SUPER_USER);
+          List<List<String>> noti_rm = esql.executeQueryAndReturnResult(query);
+          
+
+         // System.out.println(noti_rm.size());
+          for(int i = 0; i < noti_rm.size(); i++){
+              System.out.println(noti_rm.get(i).get(0));
+              String temp = String.format("DELETE FROM notification WHERE usr_login = '%s' AND msg_id = '%s'", SUPER_USER, noti_rm.get(i).get(0));
+              esql.executeUpdate(temp);
+          }
+          return;
+      }catch (Exception e){
+          System.err.println(e.getMessage());
+          return;
+      }
+   }//end
