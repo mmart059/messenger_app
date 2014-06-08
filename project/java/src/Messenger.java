@@ -23,7 +23,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
-
+import java.util.Set;
+import java.util.TreeSet;
 /**
  * This class defines a simple embedded SQL utility class that is designed to
  * work with PostgreSQL JDBC drivers.
@@ -367,44 +368,6 @@ public class Messenger {
             
    }
    
-   //Just output the status of the user
-   public static void ViewStatus(Messenger esql){
-    try{
-        String query = String.format("SELECT status FROM Usr WHERE login='%s'",
-                                      SUPER_USER);
-        List<List<String> > result = esql.executeQueryAndReturnResult(query);
-        
-        if(result.get.(0).get(0) != null){
-            System.out.println("\tUser Current Status: " + result.get(0).get(0));
-        } else{
-            System.out.println("\tNo recent status");
-        }
-    }catch(Exception e){
-        System.err.println(e.getMessage());
-    }
-   }
-   
-   //Just update the status 
-   public static void UpdateStatus(Messenger esql){
-        try{
-            System.out.print("\tEnter new status: ");
-            String status = in.readLine();
-            String query = String.format("UPDATE USR SET status='%s' WHERE login='%s'", 
-                                         status,SUPER_USER);
-            esql.executeUpdate(query);
-            
-            System.out.println("Your status has been successfully updated!");
-             
-        }catch(Exception e){
-            System.err.println(e.getMessage());
-        }
-   }
-
-   //Delete the user if is not an initial sender of any chat
-   public static void DeleteUser(Messenger esql){
-
-   }
-
    public static void Greeting(){
       System.out.println(
          "\n\n*******************************************************\n" +
@@ -665,13 +628,275 @@ public class Messenger {
       // Your code goes here.
       // ...
       // ...
+      try{ 
+            
+            //Warns user about creating a new chat, and asks to continue
+            System.out.println("\n WARNING! This creates a new chat. do you want to continue: ");
+            System.out.println("\t1. Create New Chat");
+            System.out.println("\t2. Exit"); 
+            System.out.println("\t......................... ");
+            boolean message_menu = true;
+            while(message_menu){
+                switch(readChoice()){
+                    case 1: CreateNewChat(esql); message_menu = false;break;
+                    case 2: message_menu = false; break;
+                    default: System.out.println("Uncrecognized choice!"); break;   
+                }
+            }
+      } catch(Exception e){
+        System.err.println(e.getMessage());   
+      }
+   }
+    
+   public static void CreateNewChat(Messenger esql){
+    try{
+        
+        //Asks for chat type
+        boolean chat_type = true;
+        while(chat_type){
+            System.out.println("\nChat types"); 
+            System.out.println("\t1. Private");
+            System.out.println("\t2. Group");
+            System.out.println("\t3. Exit"); 
+            System.out.println("\t......................... ");
+       
+            //making choices with chat type 
+            switch(readChoice()){
+                case 1: 
+                    boolean result = privateChat(esql); 
+                    if(result){
+                        System.out.println("SUCCESS");
+                        return;
+                    }else{
+
+                        break;
+                    }
+                case 2: groupChat(esql); return;
+                case 3: chat_type = false; break;
+                default: System.out.println("Unrecognized choice!");
+            }
+        }
+        return;
+    } catch(Exception e){
+        System.err.println(e.getMessage());
+    }
+   }
+
+   public static boolean privateChat(Messenger esql){
+        try{
+            String query = null;
+            
+            while(true){
+                System.out.print("\tEnter login of recipient(leave blank to quit): ");
+                String member = in.readLine();
+                if(member.length() > 0 ){
+                    
+                    query = String.format("SELECT * FROM Usr WHERE login='%s'", member);
+                    int number = esql.executeQuery(query);
+
+                    if(number > 0){
+                        //Creating the CHAT
+                        List<String> Members = new ArrayList<String>();
+                        Members.add(SUPER_USER);
+                        Members.add(member);
+                        System.out.println("Going to CREATE NEW CHAT with " + member);
+                        query = String.format("INSERT INTO CHAT(chat_type,init_sender) VALUES('private','%s')",
+                                              SUPER_USER);
+                        esql.executeUpdate(query);
+
+                        int chat_id = esql.getCurrSeqVal("CHAT_chat_id_seq");
+                        System.out.print("The current chat_id is ");
+                        System.out.println(chat_id);
+                        
+                        //Creating the message to send to the specified user
+                        enterMessage(esql,Members, chat_id);
+                        return true;
+                    } else{
+                        System.out.println("User does not exist!");
+                    }
+                
+                } else{
+                    return false;
+                }
+            }
+
+        } catch(Exception e){
+            System.err.println(e.getMessage());
+        }
+        return false;
    }//end 
+   
+   public static void groupChat(Messenger esql){
+    try{
+        String query = null;
+        Set<String> Members = new TreeSet<String>();
+        List<String> all = new ArrayList<String>();
+        System.out.print("\tEnter login of recipient: ");
+        String member = in.readLine();
+        
+        boolean cont = true;
+        while(cont){
+            query = String.format("SELECT * FROM Usr WHERE login='%s'", member);
+            Members.add(SUPER_USER);
+          
+         int res = esql.executeQuery(query);
+         if(res > 0){
+            Members.add(member);
+
+         } else{
+            System.out.println("User specified does not exist");
+
+         }
+         System.out.println("\t1. Enter another group member");
+         System.out.println("\t2. Finish group list");
+         switch(readChoice()){
+            case 1: 
+                System.out.print("\tEnter login of recipient: ");
+                member = in.readLine();
+                break;
+            case 2: 
+                cont = false; 
+                query = String.format("INSERT INTO CHAT(chat_type, init_sender) VALUES('group', '%s')",
+                                      SUPER_USER);
+                esql.executeUpdate(query);
+                int chat_id = esql.getCurrSeqVal("chat_chat_id_seq");
+                all.addAll(Members);
+                enterMessage(esql, all, chat_id);
+                break;
+            default: System.out.println("Unrecognized choice!"); break;
+         }
+        }
+    } catch(Exception e){
+        System.err.println(e.getMessage());
+    }
+   }
+   
+   public static void enterMessage(Messenger esql, List<String> Members, int chat){
+        try{
+        System.out.print("\tEnter message text: ");
+        String message=in.readLine();
+        int chat_id = chat;
+        //loops until message is correct length
+        while(message.length() > 300)
+        {
+             
+            message=""; //clear message body 
+            System.out.print("\tError: Message is too long. Message body must be less than 300 characters"); 
+            System.out.print("\n\tEnter message text: "); 
+            message=in.readLine(); 
+        }
+         
+        String query = String.format("INSERT INTO MESSAGE (msg_text,msg_timestamp, sender_login, chat_id) VALUES ('%s', 'now()', '%s', '%s')", 
+                                      message, SUPER_USER, chat_id);
+        esql.executeUpdate(query);
+        
+        int mes_id = esql.getCurrSeqVal("message_msg_id_seq");
+        long d_date = 0;
+        int media_id = 0;
+
+        boolean cont = true;
+
+        while(cont){
+            System.out.println("\t1. Add media Attachments");
+            System.out.println("\t2. Add Self Destruct feature");
+            System.out.println("\t3. Complete and Send Message");
+            System.out.println("\t...............................");
+
+            switch(readChoice()){
+                case 1:
+                    System.out.print("\tEnter attachment type: ");
+                    String attach = in.readLine();
+
+                    System.out.print("\tEnter attachment URL: ");
+                    String URL = in.readLine();
+                    query = String.format("INSERT INTO MEDIA_ATTACHMENT(media_type,URL, msg_id) VALUES('%s', '%s', '%s')", 
+                                          attach, URL, mes_id);
+
+                    esql.executeUpdate(query);
+                    media_id = esql.getCurrSeqVal("media_attachment_media_id_seq");
+                    break;
+                case 2:
+                    System.out.println("\tSelf Delete message in how many days: ");
+                    String date = in.readLine();
+                    query = String.format("UPDATE MESSAGE set destr_timestamp = now() + interval('%s' days)", 
+                                           date);
+                    esql.executeUpdate(query);
+                    break;
+                case 3:
+                    cont = false;
+                    break;
+                default: System.out.print("Unrecognized choice!"); break;
+            }
+        }
+
+        query = String.format("INSERT INTO CHAT_LIST(chat_id, member) VALUES( '%s', '%s')",
+                               chat_id, SUPER_USER);
+        esql.executeUpdate(query);
+
+
+        for(int i = 1; i < Members.size(); i++){
+            String temp = Members.get(i);
+
+            query = String.format("INSERT INTO CHAT_LIST(chat_id, member) VALUES('%s', '%s')", 
+                                   chat_id, temp);
+            esql.executeUpdate(query);
+
+            query = String.format("INSERT INTO NOTIFICATION(usr_login, msg_id) VALUES ('%s', '%s')", 
+                                   temp, mes_id);
+            esql.executeUpdate(query);
+
+        }
+     } catch(Exception e){
+        System.err.println(e.getMessage());
+     }
+   }
+   
+   
 
    public static void ReadNotifications(Messenger esql){
       // Your code goes here.
       // ...
       // ...
    }//end
+
+   //Just output the status of the user
+   public static void ViewStatus(Messenger esql){
+    try{
+        String query = String.format("SELECT status FROM Usr WHERE login='%s'",
+                                      SUPER_USER);
+        List<List<String> > result = esql.executeQueryAndReturnResult(query);
+        
+        if(result.get(0).get(0) != null){
+            System.out.println("\tUser Current Status: " + result.get(0).get(0));
+        } else{
+            System.out.println("\tNo recent status");
+        }
+    }catch(Exception e){
+        System.err.println(e.getMessage());
+    }
+   }
+   
+   //Just update the status 
+   public static void UpdateStatus(Messenger esql){
+        try{
+            System.out.print("\tEnter new status: ");
+            String status = in.readLine();
+            String query = String.format("UPDATE USR SET status='%s' WHERE login='%s'", 
+                                         status,SUPER_USER);
+            esql.executeUpdate(query);
+            
+            System.out.println("Your status has been successfully updated!");
+             
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+        }
+   }
+
+   //Delete the user if is not an initial sender of any chat
+   public static void DeleteUser(Messenger esql){
+
+   }
+
 
    public static void Query6(Messenger esql){
       // Your code goes here.
