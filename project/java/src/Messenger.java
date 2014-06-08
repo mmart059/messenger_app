@@ -255,33 +255,33 @@ public class Messenger {
             System.out.println("1. Create user");
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
-            String authorisedUser = null;
             switch (readChoice()){
                case 1: CreateUser(esql); break;
-               case 2: authorisedUser = LogIn(esql); break;
+               case 2: LogIn(esql); break;
                case 9: keepon = false; break;
                default : System.out.println("Unrecognized choice!"); break;
             }//end switch
-            if (authorisedUser != null) {
+            if (SUPER_USER != null) {
               boolean usermenu = true;
               while(usermenu) {
-                System.out.println("MAIN MENU");
+                System.out.println("\nMAIN MENU");
                 System.out.println("---------");
                 System.out.println("Notifications");
-                System.out.println("1. View Notifications");
-                System.out.println(".........................");
+                System.out.println("\t1. View Notifications");
+                System.out.println("\n.........................\n");
                 System.out.println("Messages");
-                System.out.println("2. Write a new message");
-                System.out.println("3. Reply to Messages");
-                System.out.println(".........................");
+                System.out.println("\t2. Write a new message");
+                System.out.println("\t3. Reply to Messages");
+                System.out.println("\n.........................\n");
                 System.out.println("Contact List");
-                System.out.println("4. Edit/View Contact List");
-                System.out.println("5. Edit/View Blocked List");
-                System.out.println(".........................");
-                System.out.println("6. View Status");
-                System.out.println("7. Update Status");
-                System.out.println("8. Delete user account");
-                System.out.println("9. Log out");
+                System.out.println("\t4. Edit/View Contact List");
+                System.out.println("\t5. Edit/View Blocked List");
+                System.out.println("\n.........................\n");
+                System.out.println("User Options");
+                System.out.println("\t6. View Status");
+                System.out.println("\t7. Update Status");
+                System.out.println("\t8. Delete user account");
+                System.out.println("\t9. Log out\n");
                 switch (readChoice()){
                    case 1: ReadNotifications(esql); break;
                    case 2: NewMessage(esql); break;
@@ -320,22 +320,84 @@ public class Messenger {
 
    //Shows sub menu to add/delete contacts and view all contacts
    public static void EditContactList(Messenger esql){
+        boolean contact_menu = true;
 
+        while(contact_menu){
+            System.out.println("\n.........................\n");
+            System.out.println("Contact List");
+            System.out.println("\t1. Add Contacts");
+            System.out.println("\t2. Delete Contacts");
+            System.out.println("\t3. Browse Your Contact List");
+            System.out.println("\t9. Back to Main Menu");
+            System.out.println("\n.........................\n");
+
+            switch(readChoice()){
+                case 1: AddToContact(esql); break;
+                case 2: DeleteFromContacts(esql); break;
+                case 3: ListContacts(esql); break;
+                case 9: contact_menu = false; break;
+                default: System.out.println("Unrecognized choice!"); break;
+            }
+        }
+        return;
    }
 
    //Shows sub menu to add/delete blocked users as well as viewing
    public static void EditBlockedList(Messenger esql){
+        boolean blocked_menu = true;
 
+        while(blocked_menu){
+            System.out.println("\n.........................\n");
+            System.out.println("Blocked Contact List");
+            System.out.println("\t1. Add Contacts to Blocked List");
+            System.out.println("\t2. Delete Contacts from Blocked List");
+            System.out.println("\t3. Browse Blocked Contact List");
+            System.out.println("\t9. Back to Main Menu");
+            System.out.println("\n.........................");
+            
+            switch(readChoice()){
+                case 1: AddBlockedContact(esql); break;
+                case 2: DeleteBlockedContact(esql); break;
+                case 3: ListBlockedContacts(esql); break;
+                case 9: blocked_menu = false; break;
+                default: System.out.println("Unrecognized choice!"); break;
+            }
+        }
+        return;
+            
    }
    
    //Just output the status of the user
    public static void ViewStatus(Messenger esql){
-
+    try{
+        String query = String.format("SELECT status FROM Usr WHERE login='%s'",
+                                      SUPER_USER);
+        List<List<String> > result = esql.executeQueryAndReturnResult(query);
+        
+        if(result.get.(0).get(0) != null){
+            System.out.println("\tUser Current Status: " + result.get(0).get(0));
+        } else{
+            System.out.println("\tNo recent status");
+        }
+    }catch(Exception e){
+        System.err.println(e.getMessage());
+    }
    }
    
    //Just update the status 
    public static void UpdateStatus(Messenger esql){
-
+        try{
+            System.out.print("\tEnter new status: ");
+            String status = in.readLine();
+            String query = String.format("UPDATE USR SET status='%s' WHERE login='%s'", 
+                                         status,SUPER_USER);
+            esql.executeUpdate(query);
+            
+            System.out.println("Your status has been successfully updated!");
+             
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+        }
    }
 
    //Delete the user if is not an initial sender of any chat
@@ -486,19 +548,23 @@ public class Messenger {
       // ...
       try{
          String query = String.format("SELECT contact_list FROM Usr WHERE login = '%s'", SUPER_USER);
-         System.out.println("Received contact list from query");         
          
          List<List<String> > result = esql.executeQueryAndReturnResult(query);
          if(result.size() > 0){
-            query = String.format("SELECT list_member FROM USER_LIST_CONTAINS WHERE list_id= '%s'", 
+            query = String.format("SELECT A.list_member, B.status FROM USER_LIST_CONTAINS A, Usr B WHERE A.list_id= '%s' AND B.login=A.list_member", 
                                    Integer.parseInt(result.get(0).get(0)));   
             
             result = esql.executeQueryAndReturnResult(query);
             
-            System.out.println("\tContact List");
-            System.out.println("\t............");
+            System.out.println("\nYour Contacts\n");
             for( int i = 0; i < result.size(); i++){
-               System.out.println("\t" + result.get(i).get(0));
+                query = String.format("SELECT status FROM Usr WHERE login='%s'", result.get(i).get(0));
+                System.out.print("\t"+ result.get(i).get(0));
+                if(result.get(i).get(1) != null){
+                    System.out.println("\t" + result.get(i).get(1));
+                } else{
+                    System.out.println("\t" + "None");
+                }
             }
             
          } else{
@@ -512,27 +578,32 @@ public class Messenger {
    public static void ListBlockedContacts(Messenger esql){
       try{
          String query = String.format("SELECT block_list FROM Usr WHERE login = '%s'", SUPER_USER);
-         System.out.println("Received contact list from query");         
          
          List<List<String> > result = esql.executeQueryAndReturnResult(query);
          if(result.size() > 0){
+            System.out.println("Block ID Attempting to access is: " + result.get(0).get(0));
             query = String.format("SELECT list_member FROM USER_LIST_CONTAINS WHERE list_id= '%s'", 
                                    Integer.parseInt(result.get(0).get(0)));   
             
             result = esql.executeQueryAndReturnResult(query);
+            if(result.size() > 0){
+                System.out.println("\nYour Blocked Contacts\n");
             
-            System.out.println("\tBlocked Contact List");
-            System.out.println("\t............");
-            for( int i = 0; i < result.size(); i++){
-               System.out.println("\t" + result.get(i).get(0));
+                System.out.println("\nYour Blocked Contacts\n");
+                for( int i = 0; i < result.size(); i++){
+                    query = String.format("SELECT status FROM Usr WHERE login='%s'", result.get(i).get(0));
+                    System.out.println("\t"+ result.get(i).get(0) + "\n");
+                }
+            } else{
+                System.out.println("\nYou have no blocked contacts\n");
             }
-            
          } else{
-            System.out.println("You don't have any blocked contacts.");
+             System.out.println("Oops! An error occurred.");
          }    
       }catch(Exception e){
         System.err.println(e.getMessage());
       }
+
    }
 
    public static void DeleteBlockedContact(Messenger esql){
@@ -565,7 +636,7 @@ public class Messenger {
 
    public static void AddBlockedContact(Messenger esql){
           try{
-            System.out.print("Enter user to add to blocked contacts: ");
+            System.out.print("\tEnter user to block: ");
             String input = in.readLine();
 
 
@@ -577,11 +648,11 @@ public class Messenger {
                 query = String.format("SELECT block_list FROM Usr WHERE login = '%s'", SUPER_USER);
                 List<List<String> > result = esql.executeQueryAndReturnResult(query);
                 
-                query = String.format("INSERT INTO USR_LIST_CONTAINS(list_id, list_member) VALUES('%s','%s')",
+                query = String.format("INSERT INTO USER_LIST_CONTAINS(list_id, list_member) VALUES('%s','%s')",
                                        Integer.parseInt(result.get(0).get(0)),input);
                 esql.executeUpdate(query);
 
-                System.out.println("Successfully added " + input + " into your blocked contacts");
+                System.out.println("\nSuccessfully added " + input + " into your blocked contacts");
 
             } else {
                 System.out.println("The user you are attempting to block does not exist");
