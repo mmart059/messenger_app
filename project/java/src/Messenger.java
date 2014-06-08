@@ -376,49 +376,65 @@ return -1;
             System.err.println(e.getMessage());
         }
     }
-    public static void ViewMessages(Messenger esql, String chat_id){
-        try{
-            //output message also serves as a test to see if chat id exists for the user
-            String query = String.format("SELECT DISTINCT msg_timestamp, sender_login, M.msg_text, msg_id FROM message M, chat_list C WHERE M.chat_id = '%s' AND C.member = '%s'", chat_id, SUPER_USER);
-            int user_check=esql.executeQuery(query);
-            if(user_check>0){
-                List<List<String>> Message=esql.executeQueryAndReturnResult(query);
-                for(int i=Message.size()-1; i>=0; i--)
-                {
-                    System.out.print(Message.get(i).get(0));
-                    System.out.print("\t");
-                    System.out.print(Message.get(i).get(1));
-                    System.out.print("\t");
-                    System.out.print(Message.get(i).get(2));
-                    System.out.println("\t");
-                    String msg_id=Message.get(i).get(3);
-                    query=String.format("SELECT media_type, url FROM media_attachment WHERE msg_id='%s'", msg_id);
-                    int num=esql.executeQuery(query);
-                    if(num>0)
-                    {
-                        System.out.print("\tThis message has attachment: ");
-                        esql.executeQueryAndPrintResult(query);
-                    }
+public static void SelfDestruct(Messenger esql, String msg_id){
+    try{
+        String query=String.format("SELECT destr_timestamp FROM MESSAGE WHERE msg_id='%s'",msg_id); 
+        List<List<String>>Destroy=esql.executeQueryAndReturnResult(query);
+        query=String.format("DELETE msg_id WHERE msg_id='%s' AND destr_timestamp > now()", msg_id); 
+        esql.executeUpdate(query);
+    }
+    catch(Exception e){
+        System.err.println(e.getMessage());
+    }
+}
+    
+public static void ViewMessages(Messenger esql, String chat_id){
+    try{
+        //output message also serves as a test to see if chat id exists for the user
+        String query = String.format("SELECT DISTINCT msg_timestamp, sender_login, M.msg_text, msg_id FROM message M, chat_list C WHERE M.chat_id = '%s' AND C.member = '%s'", chat_id, SUPER_USER);
+        int user_check=esql.executeQuery(query);
+        if(user_check>0){ 
+            List<List<String>> Message=esql.executeQueryAndReturnResult(query);
+            for(int i=Message.size()-1; i>=0; i--){
+                System.out.print(Message.get(i).get(0));
+                System.out.print("\t");
+                System.out.print(Message.get(i).get(1));
+                System.out.print("\t");
+                System.out.print(Message.get(i).get(2)); 
+                System.out.println("\t");
+                String msg_id=Message.get(i).get(3);
+                SelfDestruct(esql,msg_id);
+                query=String.format("SELECT media_type, url FROM media_attachment WHERE msg_id='%s'", msg_id); 
+                int num=esql.executeQuery(query);
+                if(num>0){ 
+                    System.out.print("\tThis message has attachment type: "); 
+                    List<List<String>>Media=esql.executeQueryAndReturnResult(query); 
+                    System.out.print(Media.get(i).get(0));
+                    System.out.print("URL: ");
+                    System.out.print(Media.get(i).get(1));
+                } 
                     
-                    if(i%10==0 && (i!=0)){
-                        System.out.print("\tEnter 1: To load more messages, Enter anything to continue");
-                        String choice=in.readLine();
-                        if(!choice.equals("1")){
-                            break;
-                        }
+                System.out.print("\n");
+                
+                if(i%10==0 && (i!=0)){
+                    System.out.print("\tEnter 1: To load more messages, Enter anything to continue");
+                    String choice=in.readLine(); 
+                    if(!choice.equals("1")){
+                        break;
                     }
                 }
+            }
 
             }
-            else{
-                System.out.println("You are not a member of that chat.");
-                return;
-            }
-        }
-        catch(Exception e){
-            System.err.println(e.getMessage());
-        }
-        }
+    else{
+        System.out.println("You are not a member of that chat."); 
+        return; 
+    }
+    }
+    catch(Exception e){
+        System.err.println(e.getMessage());
+    }
+    }
             
     public static void SelectChat(Messenger esql){
         try{
@@ -1151,5 +1167,3 @@ public static void DeleteUser(Messenger esql){
 
 
 }//end Messenger
-
-
