@@ -1,0 +1,50 @@
+Meara Eide Nelson 
+Miguel Martinez
+Michael De La Torre
+
+June 7, 2014
+
+Split of duties between Michael, Meara, Miguel: 
+	Though we all worked together each group member "spear headed" portions
+	of the project. This person was in charge of decisions of error checking
+	and user choices for that portion. Then periodically we would go through
+	and coordinate to make sure our user interfaces were cohesive.
+	USERS
+	~ Delete One's Own Account: Meara
+	~ Browse  Contact/Block List: Miguel
+	~ Add\Delete other users: Miguel 
+	~ Browse Current Notifications: Miguel
+	~ Browse Chats: Michael
+	~ Creation of new Chats: Meara
+	CHATS
+	~ Add/Delete Members of Chat: Michael 
+	~ View last 10 chats and load old messages: Meara
+	~ Messages are displayed in chronoligical order: Michael
+	MESSAGES
+	~ all chat members can add to create a new message: Meara/Michael
+	~ Each message should indicate author, date, text: Michael 
+	~ Messages should self-destuct when specified: ??
+	
+Issues that arose during creation of messages: 
+	First issue that arose was using the timestamp variable. Initially 
+	we tried to use java function to get and construct a timestamp variable. 
+	Issues arose due to the constructor not allowed to be used in the 
+	static way she wanted. We changed this using the SQL function now(). 
+	This was much more successful. Due to changing how we did the original 
+	timestamp we changed the destruction timestamp as well to use the now()
+	function. This also made it more user friendly, because the user 
+	was going to have to enter the timestamp in the correct format with 
+	year-month-day hours:minutes:seconds. Creating a headache to verify 
+	their input was in the correct format. Instead we used the +interval 
+	function. 
+
+Issues 
+	
+Assumptions made due to the non-specificness of the specs: 
+	~ We assume that when a user views thier contact list they also want to 
+		view there "friends" statuses at the same time. 
+	~ We assume that when a user will only choose to set a self destruction 
+		in a period of days. We chose days so that the user could pick a 
+		large time period time 365 days but also allow a short time period
+		like a day. 
+	
