@@ -1,14 +1,14 @@
 /*
- * Template JAVA User Interface
- * =============================
- *
- * Database Management Systems
- * Department of Computer Science &amp; Engineering
- * University of California - Riverside
- *
- * Target DBMS: 'Postgres'
- *
- */
+* Template JAVA User Interface
+* =============================
+*
+* Database Management Systems
+* Department of Computer Science &amp; Engineering
+* University of California - Riverside
+*
+* Target DBMS: 'Postgres'
+*
+*/
 
 
 import java.sql.DriverManager;
@@ -24,12 +24,12 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.LinkedHashSet;
 /**
- * This class defines a simple embedded SQL utility class that is designed to
- * work with PostgreSQL JDBC drivers.
- *
- */
+* This class defines a simple embedded SQL utility class that is designed to
+* work with PostgreSQL JDBC drivers.
+*
+*/
 public class Messenger {
 
    // reference to physical database connection.
@@ -41,14 +41,14 @@ public class Messenger {
                                 new InputStreamReader(System.in));
 
    /**
-    * Creates a new instance of Messenger
-    *
-    * @param hostname the MySQL or PostgreSQL server hostname
-    * @param database the name of the database
-    * @param username the user name used to login to the database
-    * @param password the user login password
-    * @throws java.sql.SQLException when failed to make a connection.
-    */
+* Creates a new instance of Messenger
+*
+* @param hostname the MySQL or PostgreSQL server hostname
+* @param database the name of the database
+* @param username the user name used to login to the database
+* @param password the user login password
+* @throws java.sql.SQLException when failed to make a connection.
+*/
    public Messenger (String dbname, String dbport, String user, String passwd) throws SQLException {
 
       System.out.print("Connecting to database...");
@@ -68,12 +68,12 @@ public class Messenger {
    }//end Messenger
 
    /**
-    * Method to execute an update SQL statement.  Update SQL instructions
-    * includes CREATE, INSERT, UPDATE, DELETE, and DROP.
-    *
-    * @param sql the input SQL string
-    * @throws java.sql.SQLException when update failed
-    */
+* Method to execute an update SQL statement. Update SQL instructions
+* includes CREATE, INSERT, UPDATE, DELETE, and DROP.
+*
+* @param sql the input SQL string
+* @throws java.sql.SQLException when update failed
+*/
    public void executeUpdate (String sql) throws SQLException {
       // creates a statement object
       Statement stmt = this._connection.createStatement ();
@@ -86,14 +86,14 @@ public class Messenger {
    }//end executeUpdate
 
    /**
-    * Method to execute an input query SQL instruction (i.e. SELECT).  This
-    * method issues the query to the DBMS and outputs the results to
-    * standard out.
-    *
-    * @param query the input query string
-    * @return the number of rows returned
-    * @throws java.sql.SQLException when failed to execute the query
-    */
+* Method to execute an input query SQL instruction (i.e. SELECT). This
+* method issues the query to the DBMS and outputs the results to
+* standard out.
+*
+* @param query the input query string
+* @return the number of rows returned
+* @throws java.sql.SQLException when failed to execute the query
+*/
    public int executeQueryAndPrintResult (String query) throws SQLException {
       // creates a statement object
       Statement stmt = this._connection.createStatement ();
@@ -102,9 +102,9 @@ public class Messenger {
       ResultSet rs = stmt.executeQuery (query);
 
       /*
-       ** obtains the metadata object for the returned result set.  The metadata
-       ** contains row and column info.
-       */
+** obtains the metadata object for the returned result set. The metadata
+** contains row and column info.
+*/
       ResultSetMetaData rsmd = rs.getMetaData ();
       int numCol = rsmd.getColumnCount ();
       int rowCount = 0;
@@ -112,13 +112,13 @@ public class Messenger {
       // iterates through the result set and output them to standard out.
       boolean outputHeader = true;
       while (rs.next()){
-	 if(outputHeader){
-	    for(int i = 1; i <= numCol; i++){
-		System.out.print(rsmd.getColumnName(i) + "\t");
-	    }
-	    System.out.println();
-	    outputHeader = false;
-	 }
+if(outputHeader){
+for(int i = 1; i <= numCol; i++){
+System.out.print(rsmd.getColumnName(i) + "\t");
+}
+System.out.println();
+outputHeader = false;
+}
          for (int i=1; i<=numCol; ++i)
             System.out.print (rs.getString (i) + "\t");
          System.out.println ();
@@ -129,50 +129,50 @@ public class Messenger {
    }//end executeQuery
 
    /**
-    * Method to execute an input query SQL instruction (i.e. SELECT).  This
-    * method issues the query to the DBMS and returns the results as
-    * a list of records. Each record in turn is a list of attribute values
-    *
-    * @param query the input query string
-    * @return the query result as a list of records
-    * @throws java.sql.SQLException when failed to execute the query
-    */
-   public List<List<String>> executeQueryAndReturnResult (String query) throws SQLException { 
-      // creates a statement object 
-      Statement stmt = this._connection.createStatement (); 
+* Method to execute an input query SQL instruction (i.e. SELECT). This
+* method issues the query to the DBMS and returns the results as
+* a list of records. Each record in turn is a list of attribute values
+*
+* @param query the input query string
+* @return the query result as a list of records
+* @throws java.sql.SQLException when failed to execute the query
+*/
+   public List<List<String>> executeQueryAndReturnResult (String query) throws SQLException {
+      // creates a statement object
+      Statement stmt = this._connection.createStatement ();
  
-      // issues the query instruction 
-      ResultSet rs = stmt.executeQuery (query); 
+      // issues the query instruction
+      ResultSet rs = stmt.executeQuery (query);
  
-      /* 
-       ** obtains the metadata object for the returned result set.  The metadata 
-       ** contains row and column info. 
-       */ 
-      ResultSetMetaData rsmd = rs.getMetaData (); 
-      int numCol = rsmd.getColumnCount (); 
-      int rowCount = 0; 
+      /*
+** obtains the metadata object for the returned result set. The metadata
+** contains row and column info.
+*/
+      ResultSetMetaData rsmd = rs.getMetaData ();
+      int numCol = rsmd.getColumnCount ();
+      int rowCount = 0;
  
-      // iterates through the result set and saves the data returned by the query. 
+      // iterates through the result set and saves the data returned by the query.
       boolean outputHeader = false;
-      List<List<String>> result  = new ArrayList<List<String>>(); 
+      List<List<String>> result = new ArrayList<List<String>>();
       while (rs.next()){
-          List<String> record = new ArrayList<String>(); 
-         for (int i=1; i<=numCol; ++i) 
-            record.add(rs.getString (i)); 
-         result.add(record); 
-      }//end while 
-      stmt.close (); 
-      return result; 
+          List<String> record = new ArrayList<String>();
+         for (int i=1; i<=numCol; ++i)
+            record.add(rs.getString (i));
+         result.add(record);
+      }//end while
+      stmt.close ();
+      return result;
    }//end executeQueryAndReturnResult
 
    /**
-    * Method to execute an input query SQL instruction (i.e. SELECT).  This
-    * method issues the query to the DBMS and returns the number of results
-    *
-    * @param query the input query string
-    * @return the number of rows returned
-    * @throws java.sql.SQLException when failed to execute the query
-    */
+* Method to execute an input query SQL instruction (i.e. SELECT). This
+* method issues the query to the DBMS and returns the number of results
+*
+* @param query the input query string
+* @return the number of rows returned
+* @throws java.sql.SQLException when failed to execute the query
+*/
    public int executeQuery (String query) throws SQLException {
        // creates a statement object
        Statement stmt = this._connection.createStatement ();
@@ -191,26 +191,26 @@ public class Messenger {
    }
 
    /**
-    * Method to fetch the last value from sequence. This
-    * method issues the query to the DBMS and returns the current 
-    * value of sequence used for autogenerated keys
-    *
-    * @param sequence name of the DB sequence
-    * @return current value of a sequence
-    * @throws java.sql.SQLException when failed to execute the query
-    */
+* Method to fetch the last value from sequence. This
+* method issues the query to the DBMS and returns the current
+* value of sequence used for autogenerated keys
+*
+* @param sequence name of the DB sequence
+* @return current value of a sequence
+* @throws java.sql.SQLException when failed to execute the query
+*/
    public int getCurrSeqVal(String sequence) throws SQLException {
-	Statement stmt = this._connection.createStatement ();
-	
-	ResultSet rs = stmt.executeQuery (String.format("Select currval('%s')", sequence));
-	if (rs.next())
-		return rs.getInt(1);
-	return -1;
+Statement stmt = this._connection.createStatement ();
+
+ResultSet rs = stmt.executeQuery (String.format("Select currval('%s')", sequence));
+if (rs.next())
+return rs.getInt(1);
+return -1;
    }
 
    /**
-    * Method to close the physical connection if it is open.
-    */
+* Method to close the physical connection if it is open.
+*/
    public void cleanup(){
       try{
          if (this._connection != null){
@@ -222,10 +222,10 @@ public class Messenger {
    }//end cleanup
 
    /**
-    * The main execution method
-    *
-    * @param args the command line arguments this inclues the <mysql|pgsql> <login file>
-    */
+* The main execution method
+*
+* @param args the command line arguments this inclues the <mysql|pgsql> <login file>
+*/
    public static void main (String[] args) {
       if (args.length != 3) {
          System.err.println (
@@ -291,8 +291,10 @@ public class Messenger {
                    case 5: EditBlockedList(esql); break;
                    case 6: ViewStatus(esql); break;
                    case 7: UpdateStatus(esql); break;
-                   case 8: DeleteUser(esql); break;
-                   case 9: usermenu = false; break;
+                   case 8: DeleteUser(esql);
+                            usermenu=false;
+                            break;
+                   case 9: usermenu = false; SUPER_USER = null; break;
                    default : System.out.println("Unrecognized choice!"); break;
                 }
               }
@@ -314,10 +316,208 @@ public class Messenger {
       }//end try
    }//end main
 
-   //Going to show all the chats and then being able to select chat to reply 
-   public static void ReplyToMessages(Messenger esql){
-       
+   //Going to show all the chats and then being able to select chat to reply
+ public static void ReplyToMessages(Messenger esql){
+       try{
+
+        ViewChat(esql);
+        boolean chat_menu = true;
+        while(chat_menu){
+            System.out.println("\tChat Menu");
+            System.out.println("\t---------");
+            System.out.println("\t1. Select Chat");
+            System.out.println("\t2. View Chats");
+            System.out.println("\t.........................");
+            System.out.println("\t9. Back to Main Menu");
+        switch(readChoice()){
+            case 1: SelectChat(esql); break;
+            case 2: ViewChat(esql); break;
+            case 9: chat_menu = false; break;
+        default : System.out.println("Unrecognized choice!"); break;
+            }
+        }
+        }
+        catch(Exception e){
+        System.err.println(e.getMessage ());
+    }} 
+
+//after viewing chats it allows the user to respond to the chat
+     public static void ReplytoChat(Messenger esql, String chat_id){
+         try{
+            String query=String.format("SELECT member FROM CHAT_LIST where chat_id='%s'",chat_id);
+            List<List<String>>Members=esql.executeQueryAndReturnResult(query);
+            List<String>members= new ArrayList<String>();
+            for(int i=0; i <Members.size(); i++)
+            { 
+                members.add(Members.get(i).get(0));
+            }
+            int id=Integer.parseInt(chat_id);
+            enterMessage(esql,members,id);
+        }
+        catch(Exception e){
+            System.err.println(e.getMessage());
+        }
+     }
+     
+    public static void ViewChat(Messenger esql){
+        try{ 
+            System.out.println("Current Chats"); 
+            System.out.println("\n.........................\n");
+            String query = String.format("SELECT A.chat_id, B.member FROM chat A, chat_list B WHERE A.chat_id = B.chat_id and B.member = '%s'", SUPER_USER);
+            List<List<String>> Chatid_list = esql.executeQueryAndReturnResult(query);
+            for(int i = 0; i < Chatid_list.size(); i++){
+                    String temp = String.format("SELECT member, chat_id FROM chat_list WHERE chat_id = '%s'", Chatid_list.get(i).get(0));
+                    esql.executeQueryAndPrintResult(temp);
+                }
+            if(Chatid_list.size()<1)
+            System.out.println("You don't have any chats");
+            }
+        catch(Exception e){
+            System.err.println(e.getMessage());
+        }
+    }
+    public static void ViewMessages(Messenger esql, String chat_id){
+        try{
+            //output message also serves as a test to see if chat id exists for the user
+            String query = String.format("SELECT DISTINCT msg_timestamp, sender_login, M.msg_text, msg_id FROM message M, chat_list C WHERE M.chat_id = '%s' AND C.member = '%s'", chat_id, SUPER_USER);
+            int user_check=esql.executeQuery(query);
+            if(user_check>0){ 
+                List<List<String>> Message=esql.executeQueryAndReturnResult(query);
+                for(int i=Message.size()-1; i>=0; i--)
+                {
+                    System.out.print(Message.get(i).get(0));
+                    System.out.print("\t");
+                    System.out.print(Message.get(i).get(1));
+                    System.out.print("\t");
+                    System.out.print(Message.get(i).get(2)); 
+                    System.out.println("\t");
+                    String msg_id=Message.get(i).get(3);
+                    query=String.format("SELECT media_type, url FROM media_attachment WHERE msg_id='%s'", msg_id); 
+                    int num=esql.executeQuery(query);
+                    if(num>0)
+                    { 
+                        System.out.print("\tThis message has attachment: "); 
+                        esql.executeQueryAndPrintResult(query); 
+                    } 
+                    
+                    if(i%10==0 && (i!=0)){
+                        System.out.print("\tEnter 1: To load more messages, Enter anything to continue");
+                        String choice=in.readLine(); 
+                        if(!choice.equals("1")){
+                            break;
+                        }
+                    }
+                }
+
+            }
+            else{
+                System.out.println("You are not a member of that chat."); 
+                return; 
+            }
+        }
+        catch(Exception e){
+            System.err.println(e.getMessage());
+        }
+        }
+            
+    public static void SelectChat(Messenger esql){
+        try{ 
+            System.out.print("Enter Chat ID: ");
+            String chat_selected = in.readLine();
+            
+            ViewMessages(esql, chat_selected);
+            boolean chatview = true;
+            while(chatview){
+                System.out.println("\t1. Add Member");
+                System.out.println("\t2. Delete Member");
+                System.out.println("\t3. Reply to Chat");
+                System.out.println("\t4. Delete Whole Chat");
+                System.out.println("\t.........................");
+                System.out.println("\t9. Exit Chat Menu");
+                switch(readChoice()){
+                    case 1:AddMember(esql, chat_selected); break;
+                    case 2:DeleteMember(esql, chat_selected); break;
+                    case 3:ReplytoChat(esql, chat_selected); break;
+                    case 4:DeleteWholeChat(esql, chat_selected); 
+                        chatview=false;
+                        break;
+                    case 9:chatview = false; break;
+                    default: System.out.println("Unrecognized choice!"); break;
+                }
+            }
+        }
+        catch(Exception e){
+            System.err.println(e.getMessage()); 
+        }
+    }
+    
+    public static void AddMember(Messenger esql, String chat_id){
+        try{
+            String query=String.format("SELECT * FROM CHAT WHERE init_sender='%s' AND chat_id='%s'",SUPER_USER, chat_id); 
+            int check=esql.executeQuery(query); 
+            if(check>0){
+                System.out.print("\tEnter user you want to add: ");
+                String user_selected = in.readLine();
+                query = String.format("INSERT INTO chat_list(chat_id, member) VALUES ('%s', '%s')", chat_id, user_selected);
+                esql.executeUpdate(query);
+                System.out.print("\tYou have successfully added them to your chat\n"); 
+            }
+            else{
+                System.out.println("\tYou are not the creator of that chat, you cannot add members");
+                return;  
+            }
+       }catch (Exception e) {
+           System.out.println(e.getMessage());
+       }
    }
+
+    public static void DeleteMember(Messenger esql, String chat_id){
+    try{
+            String query=String.format("SELECT * FROM CHAT WHERE init_sender='%s' AND chat_id='%s'",SUPER_USER, chat_id); 
+            int check=esql.executeQuery(query); 
+            if(check>0){
+                System.out.print("\tEnter user you want to remove: ");
+                String user_selected = in.readLine();
+                query=String.format("SELECT * FROM CHAT_LIST WHERE chat_id='%s' AND member='%s'",chat_id, user_selected);
+                check=esql.executeQuery(query); 
+                if(check<0){
+                    System.out.println("User does not exist in chat"); 
+                    return;
+                }
+                query = String.format("DELETE FROM CHAT_LIST WHERE chat_id='%s' and member='%s'", chat_id, user_selected);
+                esql.executeUpdate(query);
+                System.out.print("\tYou have successfully removed them from your chat\n"); 
+            }
+            else{
+                System.out.println("\tYou are not the creator of that chat, you cannot remove members\n");
+                return;  
+            }
+       }catch (Exception e) {
+           System.out.println(e.getMessage());
+       }
+   }
+   
+   //deletes a whole chat if user is intial sender
+    public static void DeleteWholeChat(Messenger esql, String chat_id){
+        try{ 
+            String query=String.format("SELECT * FROM CHAT WHERE init_sender='%s' AND chat_id='%s'",SUPER_USER, chat_id); 
+            int check=esql.executeQuery(query); 
+            if (check<0){
+                System.out.println("\tYou did not create this chat, you can not delete it"); 
+            }
+            
+            else{
+                query = String.format("DELETE FROM chat_list WHERE member = '%s' AND chat_id = '%s'", SUPER_USER, chat_id);
+                esql.executeUpdate(query);
+                System.out.print("\tYou have successfully deleted the chat\n"); 
+            }
+        }
+        catch (Exception e){ 
+            System.err.println(e.getMessage()); 
+            }
+        }//end Delete Chat
+
+      
 
    //Shows sub menu to add/delete contacts and view all contacts
    public static void EditContactList(Messenger esql){
@@ -371,14 +571,14 @@ public class Messenger {
    public static void Greeting(){
       System.out.println(
          "\n\n*******************************************************\n" +
-         "              User Interface      	               \n" +
+         " User Interface \n" +
          "*******************************************************\n");
    }//end Greeting
 
    /*
-    * Reads the users choice given from the keyboard
-    * @int
-    **/
+* Reads the users choice given from the keyboard
+* @int
+**/
    public static int readChoice() {
       int input;
       // returns only if a correct value is given.
@@ -396,9 +596,9 @@ public class Messenger {
    }//end readChoice
 
    /*
-    * Creates a new user with privided login, passowrd and phoneNum
-    * An empty block and contact list would be generated and associated with a user
-    **/
+* Creates a new user with privided login, passowrd and phoneNum
+* An empty block and contact list would be generated and associated with a user
+**/
    public static void CreateUser(Messenger esql){
       try{
          System.out.print("\tEnter user login: ");
@@ -408,14 +608,14 @@ public class Messenger {
          System.out.print("\tEnter user phone: ");
          String phone = in.readLine();
 
-	 //Creating empty contact\block lists for a user
-	    esql.executeUpdate("INSERT INTO USER_LIST(list_type) VALUES ('block')");
-	    int block_id = esql.getCurrSeqVal("user_list_list_id_seq");
+//Creating empty contact\block lists for a user
+esql.executeUpdate("INSERT INTO USER_LIST(list_type) VALUES ('block')");
+int block_id = esql.getCurrSeqVal("user_list_list_id_seq");
         esql.executeUpdate("INSERT INTO USER_LIST(list_type) VALUES ('contact')");
-	    int contact_id = esql.getCurrSeqVal("user_list_list_id_seq");
+int contact_id = esql.getCurrSeqVal("user_list_list_id_seq");
          
-	    String query = 
-        String.format("INSERT INTO USR (phoneNum, login, password, block_list, contact_list) VALUES ('%s','%s','%s',%s,%s)", 
+String query =
+        String.format("INSERT INTO USR (phoneNum, login, password, block_list, contact_list) VALUES ('%s','%s','%s',%s,%s)",
         phone, login, password, block_id, contact_id);
 
          esql.executeUpdate(query);
@@ -426,9 +626,9 @@ public class Messenger {
    }//end
    
    /*
-    * Check log in credentials for an existing user
-    * @return User login or null is the user does not exist
-    **/
+* Check log in credentials for an existing user
+* @return User login or null is the user does not exist
+**/
    public static String LogIn(Messenger esql){
       try{
          System.out.print("\tEnter user login: ");
@@ -438,14 +638,17 @@ public class Messenger {
 
          String query = String.format("SELECT * FROM Usr WHERE login = '%s' AND password = '%s'", login, password);
          int userNum = esql.executeQuery(query);
-	      if (userNum > 0){
+         
+         if (userNum > 0){
             SUPER_USER = login;
             return login;
          }
-         
+         System.out.println("\nInvalid login and/or password!\n");
+         SUPER_USER = null;
          return null;
       }catch(Exception e){
          System.err.println (e.getMessage ());
+         SUPER_USER = null;
          return null;
       }
    }//end
@@ -458,7 +661,7 @@ public class Messenger {
         System.out.print("\tEnter user to add: ");
         String user = in.readLine();
         
-        //Checking to see if the user you want to add exists 
+        //Checking to see if the user you want to add exists
         String query = String.format("SELECT * FROM Usr WHERE login = '%s'",user);
         int userNum = esql.executeQuery(query);
 
@@ -489,16 +692,16 @@ public class Messenger {
    //functon to delete contact from contacts list
    public static void DeleteFromContacts(Messenger esql){
         try{
-            System.out.print("\tWho do you want to remove from contacts?");
+            System.out.print("\tEnter login to delete: ");
             String user = in.readLine();
 
             String query = String.format("SELECT contact_list FROM Usr WHERE login='%s'", SUPER_USER);
             List<List<String> > result = esql.executeQueryAndReturnResult(query);
-            query = String.format("DELETE FROM USER_LIST_CONTAINS WHERE list_id='%s' AND list_member= '%s'", 
+            query = String.format("DELETE FROM USER_LIST_CONTAINS WHERE list_id='%s' AND list_member= '%s'",
                                    Integer.parseInt(result.get(0).get(0)), user);
             esql.executeUpdate(query);
 
-            System.out.println("Successfully deleted " + user + " from contact list"); 
+            System.out.println("Successfully deleted " + user + " from contact list");
 
         }catch(Exception e){
            System.err.println(e.getMessage());
@@ -514,8 +717,8 @@ public class Messenger {
          
          List<List<String> > result = esql.executeQueryAndReturnResult(query);
          if(result.size() > 0){
-            query = String.format("SELECT A.list_member, B.status FROM USER_LIST_CONTAINS A, Usr B WHERE A.list_id= '%s' AND B.login=A.list_member", 
-                                   Integer.parseInt(result.get(0).get(0)));   
+            query = String.format("SELECT A.list_member, B.status FROM USER_LIST_CONTAINS A, Usr B WHERE A.list_id= '%s' AND B.login=A.list_member",
+                                   Integer.parseInt(result.get(0).get(0)));
             
             result = esql.executeQueryAndReturnResult(query);
             
@@ -532,7 +735,7 @@ public class Messenger {
             
          } else{
             System.out.println("You don't have any contacts.");
-         }    
+         }
       }catch(Exception e){
         System.err.println(e.getMessage());
       }
@@ -544,9 +747,8 @@ public class Messenger {
          
          List<List<String> > result = esql.executeQueryAndReturnResult(query);
          if(result.size() > 0){
-            System.out.println("Block ID Attempting to access is: " + result.get(0).get(0));
-            query = String.format("SELECT list_member FROM USER_LIST_CONTAINS WHERE list_id= '%s'", 
-                                   Integer.parseInt(result.get(0).get(0)));   
+            query = String.format("SELECT list_member FROM USER_LIST_CONTAINS WHERE list_id= '%s'",
+                                   Integer.parseInt(result.get(0).get(0)));
             
             result = esql.executeQueryAndReturnResult(query);
             if(result.size() > 0){
@@ -562,7 +764,7 @@ public class Messenger {
             }
          } else{
              System.out.println("Oops! An error occurred.");
-         }    
+         }
       }catch(Exception e){
         System.err.println(e.getMessage());
       }
@@ -572,7 +774,7 @@ public class Messenger {
    public static void DeleteBlockedContact(Messenger esql){
         
          try{
-            System.out.print("\tWho do you want to remove from blocked list?");
+            System.out.print("\tEnter login to remove: ");
             String input = in.readLine();
 
             String query = String.format("SELECT block_list FROM Usr WHERE login = '%s'", SUPER_USER);
@@ -628,23 +830,23 @@ public class Messenger {
       // Your code goes here.
       // ...
       // ...
-      try{ 
+      try{
             
             //Warns user about creating a new chat, and asks to continue
             System.out.println("\n WARNING! This creates a new chat. do you want to continue: ");
             System.out.println("\t1. Create New Chat");
-            System.out.println("\t2. Exit"); 
+            System.out.println("\t2. Exit");
             System.out.println("\t......................... ");
             boolean message_menu = true;
             while(message_menu){
                 switch(readChoice()){
                     case 1: CreateNewChat(esql); message_menu = false;break;
                     case 2: message_menu = false; break;
-                    default: System.out.println("Uncrecognized choice!"); break;   
+                    default: System.out.println("Uncrecognized choice!"); break;
                 }
             }
       } catch(Exception e){
-        System.err.println(e.getMessage());   
+        System.err.println(e.getMessage());
       }
    }
     
@@ -654,16 +856,16 @@ public class Messenger {
         //Asks for chat type
         boolean chat_type = true;
         while(chat_type){
-            System.out.println("\nChat types"); 
+            System.out.println("\nChat types");
             System.out.println("\t1. Private");
             System.out.println("\t2. Group");
-            System.out.println("\t3. Exit"); 
+            System.out.println("\t3. Exit");
             System.out.println("\t......................... ");
        
-            //making choices with chat type 
+            //making choices with chat type
             switch(readChoice()){
-                case 1: 
-                    boolean result = privateChat(esql); 
+                case 1:
+                    boolean result = privateChat(esql);
                     if(result){
                         System.out.println("SUCCESS");
                         return;
@@ -699,14 +901,11 @@ public class Messenger {
                         List<String> Members = new ArrayList<String>();
                         Members.add(SUPER_USER);
                         Members.add(member);
-                        System.out.println("Going to CREATE NEW CHAT with " + member);
                         query = String.format("INSERT INTO CHAT(chat_type,init_sender) VALUES('private','%s')",
                                               SUPER_USER);
                         esql.executeUpdate(query);
 
                         int chat_id = esql.getCurrSeqVal("CHAT_chat_id_seq");
-                        System.out.print("The current chat_id is ");
-                        System.out.println(chat_id);
                         
                         //Creating the message to send to the specified user
                         enterMessage(esql,Members, chat_id);
@@ -724,12 +923,12 @@ public class Messenger {
             System.err.println(e.getMessage());
         }
         return false;
-   }//end 
+   }//end
    
    public static void groupChat(Messenger esql){
     try{
         String query = null;
-        Set<String> Members = new TreeSet<String>();
+        Set<String> Members = new LinkedHashSet<String>();
         List<String> all = new ArrayList<String>();
         System.out.print("\tEnter login of recipient: ");
         String member = in.readLine();
@@ -750,12 +949,12 @@ public class Messenger {
          System.out.println("\t1. Enter another group member");
          System.out.println("\t2. Finish group list");
          switch(readChoice()){
-            case 1: 
+            case 1:
                 System.out.print("\tEnter login of recipient: ");
                 member = in.readLine();
                 break;
-            case 2: 
-                cont = false; 
+            case 2:
+                cont = false;
                 query = String.format("INSERT INTO CHAT(chat_type, init_sender) VALUES('group', '%s')",
                                       SUPER_USER);
                 esql.executeUpdate(query);
@@ -780,13 +979,13 @@ public class Messenger {
         while(message.length() > 300)
         {
              
-            message=""; //clear message body 
-            System.out.print("\tError: Message is too long. Message body must be less than 300 characters"); 
-            System.out.print("\n\tEnter message text: "); 
-            message=in.readLine(); 
+            message=""; //clear message body
+            System.out.print("\tError: Message is too long. Message body must be less than 300 characters");
+            System.out.print("\n\tEnter message text: ");
+            message=in.readLine();
         }
          
-        String query = String.format("INSERT INTO MESSAGE (msg_text,msg_timestamp, sender_login, chat_id) VALUES ('%s', 'now()', '%s', '%s')", 
+        String query = String.format("INSERT INTO MESSAGE (msg_text,msg_timestamp, sender_login, chat_id) VALUES ('%s', 'now()', '%s', '%s')",
                                       message, SUPER_USER, chat_id);
         esql.executeUpdate(query);
         
@@ -809,7 +1008,7 @@ public class Messenger {
 
                     System.out.print("\tEnter attachment URL: ");
                     String URL = in.readLine();
-                    query = String.format("INSERT INTO MEDIA_ATTACHMENT(media_type,URL, msg_id) VALUES('%s', '%s', '%s')", 
+                    query = String.format("INSERT INTO MEDIA_ATTACHMENT(media_type,URL, msg_id) VALUES('%s', '%s', '%s')",
                                           attach, URL, mes_id);
 
                     esql.executeUpdate(query);
@@ -818,7 +1017,7 @@ public class Messenger {
                 case 2:
                     System.out.println("\tSelf Delete message in how many days: ");
                     String date = in.readLine();
-                    query = String.format("UPDATE MESSAGE set destr_timestamp = now() + interval('%s' days)", 
+                    query = String.format("UPDATE MESSAGE set destr_timestamp = now() + interval('%s' days)",
                                            date);
                     esql.executeUpdate(query);
                     break;
@@ -828,20 +1027,14 @@ public class Messenger {
                 default: System.out.print("Unrecognized choice!"); break;
             }
         }
-
-        query = String.format("INSERT INTO CHAT_LIST(chat_id, member) VALUES( '%s', '%s')",
-                               chat_id, SUPER_USER);
-        esql.executeUpdate(query);
+        
+        enterIntoChatList(esql,Members,chat_id);
 
 
         for(int i = 1; i < Members.size(); i++){
             String temp = Members.get(i);
 
-            query = String.format("INSERT INTO CHAT_LIST(chat_id, member) VALUES('%s', '%s')", 
-                                   chat_id, temp);
-            esql.executeUpdate(query);
-
-            query = String.format("INSERT INTO NOTIFICATION(usr_login, msg_id) VALUES ('%s', '%s')", 
+            query = String.format("INSERT INTO NOTIFICATION(usr_login, msg_id) VALUES ('%s', '%s')",
                                    temp, mes_id);
             esql.executeUpdate(query);
 
@@ -851,12 +1044,47 @@ public class Messenger {
      }
    }
    
-   
+     public static void enterIntoChatList(Messenger esql, List<String> Members, int chat_id){
+        try{
+            for(int i = 0; i < Members.size(); i++){
+                String query = String.format("SELECT * FROM CHAT_LIST WHERE chat_id = '%s' AND member='%s'",
+                                              chat_id, Members.get(i));
+                int result = esql.executeQuery(query);
 
-   public static void ReadNotifications(Messenger esql){
+                if(result > 0){
+                    continue;
+                } else{
+                    query = String.format("INSERT INTO CHAT_LIST(chat_id, member) VALUES('%s','%s')",
+                                           chat_id, Members.get(i));
+                    esql.executeUpdate(query);
+                }
+            }
+        } catch(Exception e){
+            System.err.println(e.getMessage());
+        }
+     }
+
+     public static void ReadNotifications(Messenger esql){
       // Your code goes here.
-      // ...
-      // ...
+      try{
+          String query = String.format("SELECT M.msg_id, M.msg_timestamp, M.sender_login, M.msg_text FROM notification N, Message M WHERE N.usr_login = '%s' AND N.msg_id = M.msg_id", SUPER_USER);
+          esql.executeQueryAndPrintResult(query);
+          
+          query = String.format("SELECT N.msg_id FROM notification N, message M WHERE N.msg_id = M.msg_id AND N.usr_login = '%s'", SUPER_USER);
+          List<List<String>> noti_rm = esql.executeQueryAndReturnResult(query);
+          
+
+         // System.out.println(noti_rm.size());
+          for(int i = 0; i < noti_rm.size(); i++){
+              System.out.println(noti_rm.get(i).get(0));
+              String temp = String.format("DELETE FROM notification WHERE usr_login = '%s' AND msg_id = '%s'", SUPER_USER, noti_rm.get(i).get(0));
+              esql.executeUpdate(temp);
+          }
+          return;
+      }catch (Exception e){
+          System.err.println(e.getMessage());
+          return;
+      }
    }//end
 
    //Just output the status of the user
@@ -876,16 +1104,16 @@ public class Messenger {
     }
    }
    
-   //Just update the status 
+   //Just update the status
    public static void UpdateStatus(Messenger esql){
         try{
             System.out.print("\tEnter new status: ");
             String status = in.readLine();
-            String query = String.format("UPDATE USR SET status='%s' WHERE login='%s'", 
+            String query = String.format("UPDATE USR SET status='%s' WHERE login='%s'",
                                          status,SUPER_USER);
             esql.executeUpdate(query);
             
-            System.out.println("Your status has been successfully updated!");
+            System.out.println("\nYour status has been successfully updated!");
              
         }catch(Exception e){
             System.err.println(e.getMessage());
@@ -893,15 +1121,36 @@ public class Messenger {
    }
 
    //Delete the user if is not an initial sender of any chat
-   public static void DeleteUser(Messenger esql){
-
+	public static void DeleteUser(Messenger esql){
+    try{
+        String query= String.format("SELECT * FROM CHAT WHERE init_sender='%s'", SUPER_USER);
+        int num=esql.executeQuery(query);
+        if (num>0){
+        System.out.print("\tYou are an initial sender of a chat. You cannot delete your account. ");
+        System.out.print("\n\tPlease go back and delete the chats you have created if you want to delete your account\n");
+        return;
+    }
+    else{
+        query=String.format("DELETE FROM CHAT_LIST WHERE member='%s'",SUPER_USER);
+        esql.executeUpdate(query);
+        query=String.format("DELETE FROM USER_LIST_CONTAINS WHERE list_member='%s'", SUPER_USER);
+        esql.executeUpdate(query);
+        query=String.format("DELETE FROM USR WHERE login='%s'", SUPER_USER);
+        esql.executeUpdate(query);
+        query=String.format("DELETE FROM MESSAGE WHERE sender_login='%s'", SUPER_USER);
+        System.out.print("Successful deletion: GOOD BYE! \n");
+        SUPER_USER=null;
+        return;
+    }
+    }
+    catch(Exception e){
+        System.err.println (e.getMessage ());
+        return;
+    }
    }
 
 
-   public static void Query6(Messenger esql){
-      // Your code goes here.
-      // ...
-      // ...
-   }//end Query6
 
 }//end Messenger
+
+
