@@ -343,6 +343,20 @@ return -1;
 
 //after viewing chats it allows the user to respond to the chat
      public static void ReplytoChat(Messenger esql, String chat_id){
+         try{
+            String query=String.format("SELECT member FROM CHAT_LIST where chat_id='%s'",chat_id);
+            List<List<String>>Members=esql.executeQueryAndReturnResult(query);
+            List<String>members= new ArrayList<String>();
+            for(int i=0; i <Members.size(); i++)
+            { 
+                members.add(Members.get(i).get(0));
+            }
+            int id=Integer.parseInt(chat_id);
+            enterMessage(esql,members,id);
+        }
+        catch(Exception e){
+            System.err.println(e.getMessage());
+        }
      }
      
     public static void ViewChat(Messenger esql){
@@ -351,7 +365,7 @@ return -1;
             System.out.println("\n.........................\n");
             String query = String.format("SELECT A.chat_id, B.member FROM chat A, chat_list B WHERE A.chat_id = B.chat_id and B.member = '%s'", SUPER_USER);
             List<List<String>> Chatid_list = esql.executeQueryAndReturnResult(query);
-                for(int i = 0; i < Chatid_list.size(); i++){
+            for(int i = 0; i < Chatid_list.size(); i++){
                     String temp = String.format("SELECT member, chat_id FROM chat_list WHERE chat_id = '%s'", Chatid_list.get(i).get(0));
                     esql.executeQueryAndPrintResult(temp);
                 }
@@ -362,14 +376,10 @@ return -1;
             System.err.println(e.getMessage());
         }
     }
-    
-    public static void SelectChat(Messenger esql){
-        try{ 
-            System.out.print("Enter Chat ID: ");
-            String chat_selected = in.readLine();
-            
+    public static void ViewMessages(Messenger esql, String chat_id){
+        try{
             //output message also serves as a test to see if chat id exists for the user
-            String query = String.format("SELECT DISTINCT msg_timestamp, sender_login, M.msg_text, msg_id FROM message M, chat_list C WHERE M.chat_id = '%s' AND C.member = '%s'", chat_selected, SUPER_USER);
+            String query = String.format("SELECT DISTINCT msg_timestamp, sender_login, M.msg_text, msg_id FROM message M, chat_list C WHERE M.chat_id = '%s' AND C.member = '%s'", chat_id, SUPER_USER);
             int user_check=esql.executeQuery(query);
             if(user_check>0){ 
                 List<List<String>> Message=esql.executeQueryAndReturnResult(query);
@@ -382,13 +392,15 @@ return -1;
                     System.out.print(Message.get(i).get(2)); 
                     System.out.println("\t");
                     String msg_id=Message.get(i).get(3);
-                    query=String.format("SELECT DISTINCT media_type, url FROM media_attachment WHERE msg_id='%s'", msg_id); 
+                    query=String.format("SELECT media_type, url FROM media_attachment WHERE msg_id='%s'", msg_id); 
                     int num=esql.executeQuery(query);
                     if(num>0)
                     { 
-                        esql.executeQueryAndReturnResult(query); 
+                        System.out.print("\tThis message has attachment: "); 
+                        esql.executeQueryAndPrintResult(query); 
                     } 
-                    if(i%10==0){
+                    
+                    if(i%10==0 && (i!=0)){
                         System.out.print("\tEnter 1: To load more messages, Enter anything to continue");
                         String choice=in.readLine(); 
                         if(!choice.equals("1")){
@@ -402,7 +414,18 @@ return -1;
                 System.out.println("You are not a member of that chat."); 
                 return; 
             }
+        }
+        catch(Exception e){
+            System.err.println(e.getMessage());
+        }
+        }
             
+    public static void SelectChat(Messenger esql){
+        try{ 
+            System.out.print("Enter Chat ID: ");
+            String chat_selected = in.readLine();
+            
+            ViewMessages(esql, chat_selected);
             boolean chatview = true;
             while(chatview){
                 System.out.println("\t1. Add Member");
@@ -415,7 +438,9 @@ return -1;
                     case 1:AddMember(esql, chat_selected); break;
                     case 2:DeleteMember(esql, chat_selected); break;
                     case 3:ReplytoChat(esql, chat_selected); break;
-                    case 4:DeleteWholeChat(esql, chat_selected); break;
+                    case 4:DeleteWholeChat(esql, chat_selected); 
+                        chatview=false;
+                        break;
                     case 9:chatview = false; break;
                     default: System.out.println("Unrecognized choice!"); break;
                 }
@@ -425,7 +450,7 @@ return -1;
             System.err.println(e.getMessage()); 
         }
     }
-            
+    
     public static void AddMember(Messenger esql, String chat_id){
         try{
             String query=String.format("SELECT * FROM CHAT WHERE init_sender='%s' AND chat_id='%s'",SUPER_USER, chat_id); 
@@ -480,9 +505,11 @@ return -1;
             if (check<0){
                 System.out.println("\tYou did not create this chat, you can not delete it"); 
             }
+            
             else{
                 query = String.format("DELETE FROM chat_list WHERE member = '%s' AND chat_id = '%s'", SUPER_USER, chat_id);
                 esql.executeUpdate(query);
+                System.out.print("\tYou have successfully deleted the chat\n"); 
             }
         }
         catch (Exception e){ 
