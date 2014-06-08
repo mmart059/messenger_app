@@ -339,7 +339,7 @@ return -1;
         }
         catch(Exception e){
         System.err.println(e.getMessage ());
-    }} 
+    }}
 
 //after viewing chats it allows the user to respond to the chat
      public static void ReplytoChat(Messenger esql, String chat_id){
@@ -348,7 +348,7 @@ return -1;
             List<List<String>>Members=esql.executeQueryAndReturnResult(query);
             List<String>members= new ArrayList<String>();
             for(int i=0; i <Members.size(); i++)
-            { 
+            {
                 members.add(Members.get(i).get(0));
             }
             int id=Integer.parseInt(chat_id);
@@ -360,8 +360,8 @@ return -1;
      }
      
     public static void ViewChat(Messenger esql){
-        try{ 
-            System.out.println("Current Chats"); 
+        try{
+            System.out.println("Current Chats");
             System.out.println("\n.........................\n");
             String query = String.format("SELECT A.chat_id, B.member FROM chat A, chat_list B WHERE A.chat_id = B.chat_id and B.member = '%s'", SUPER_USER);
             List<List<String>> Chatid_list = esql.executeQueryAndReturnResult(query);
@@ -381,7 +381,7 @@ return -1;
             //output message also serves as a test to see if chat id exists for the user
             String query = String.format("SELECT DISTINCT msg_timestamp, sender_login, M.msg_text, msg_id FROM message M, chat_list C WHERE M.chat_id = '%s' AND C.member = '%s'", chat_id, SUPER_USER);
             int user_check=esql.executeQuery(query);
-            if(user_check>0){ 
+            if(user_check>0){
                 List<List<String>> Message=esql.executeQueryAndReturnResult(query);
                 for(int i=Message.size()-1; i>=0; i--)
                 {
@@ -389,20 +389,20 @@ return -1;
                     System.out.print("\t");
                     System.out.print(Message.get(i).get(1));
                     System.out.print("\t");
-                    System.out.print(Message.get(i).get(2)); 
+                    System.out.print(Message.get(i).get(2));
                     System.out.println("\t");
                     String msg_id=Message.get(i).get(3);
-                    query=String.format("SELECT media_type, url FROM media_attachment WHERE msg_id='%s'", msg_id); 
+                    query=String.format("SELECT media_type, url FROM media_attachment WHERE msg_id='%s'", msg_id);
                     int num=esql.executeQuery(query);
                     if(num>0)
-                    { 
-                        System.out.print("\tThis message has attachment: "); 
-                        esql.executeQueryAndPrintResult(query); 
-                    } 
+                    {
+                        System.out.print("\tThis message has attachment: ");
+                        esql.executeQueryAndPrintResult(query);
+                    }
                     
                     if(i%10==0 && (i!=0)){
                         System.out.print("\tEnter 1: To load more messages, Enter anything to continue");
-                        String choice=in.readLine(); 
+                        String choice=in.readLine();
                         if(!choice.equals("1")){
                             break;
                         }
@@ -411,8 +411,8 @@ return -1;
 
             }
             else{
-                System.out.println("You are not a member of that chat."); 
-                return; 
+                System.out.println("You are not a member of that chat.");
+                return;
             }
         }
         catch(Exception e){
@@ -421,7 +421,7 @@ return -1;
         }
             
     public static void SelectChat(Messenger esql){
-        try{ 
+        try{
             System.out.print("Enter Chat ID: ");
             String chat_selected = in.readLine();
             
@@ -438,7 +438,7 @@ return -1;
                     case 1:AddMember(esql, chat_selected); break;
                     case 2:DeleteMember(esql, chat_selected); break;
                     case 3:ReplytoChat(esql, chat_selected); break;
-                    case 4:DeleteWholeChat(esql, chat_selected); 
+                    case 4:DeleteWholeChat(esql, chat_selected);
                         chatview=false;
                         break;
                     case 9:chatview = false; break;
@@ -447,24 +447,24 @@ return -1;
             }
         }
         catch(Exception e){
-            System.err.println(e.getMessage()); 
+            System.err.println(e.getMessage());
         }
     }
     
     public static void AddMember(Messenger esql, String chat_id){
         try{
-            String query=String.format("SELECT * FROM CHAT WHERE init_sender='%s' AND chat_id='%s'",SUPER_USER, chat_id); 
-            int check=esql.executeQuery(query); 
+            String query=String.format("SELECT * FROM CHAT WHERE init_sender='%s' AND chat_id='%s'",SUPER_USER, chat_id);
+            int check=esql.executeQuery(query);
             if(check>0){
                 System.out.print("\tEnter user you want to add: ");
                 String user_selected = in.readLine();
                 query = String.format("INSERT INTO chat_list(chat_id, member) VALUES ('%s', '%s')", chat_id, user_selected);
                 esql.executeUpdate(query);
-                System.out.print("\tYou have successfully added them to your chat\n"); 
+                System.out.print("\tYou have successfully added them to your chat\n");
             }
             else{
                 System.out.println("\tYou are not the creator of that chat, you cannot add members");
-                return;  
+                return;
             }
        }catch (Exception e) {
            System.out.println(e.getMessage());
@@ -473,24 +473,24 @@ return -1;
 
     public static void DeleteMember(Messenger esql, String chat_id){
     try{
-            String query=String.format("SELECT * FROM CHAT WHERE init_sender='%s' AND chat_id='%s'",SUPER_USER, chat_id); 
-            int check=esql.executeQuery(query); 
+            String query=String.format("SELECT * FROM CHAT WHERE init_sender='%s' AND chat_id='%s'",SUPER_USER, chat_id);
+            int check=esql.executeQuery(query);
             if(check>0){
                 System.out.print("\tEnter user you want to remove: ");
                 String user_selected = in.readLine();
                 query=String.format("SELECT * FROM CHAT_LIST WHERE chat_id='%s' AND member='%s'",chat_id, user_selected);
-                check=esql.executeQuery(query); 
+                check=esql.executeQuery(query);
                 if(check<0){
-                    System.out.println("User does not exist in chat"); 
+                    System.out.println("User does not exist in chat");
                     return;
                 }
                 query = String.format("DELETE FROM CHAT_LIST WHERE chat_id='%s' and member='%s'", chat_id, user_selected);
                 esql.executeUpdate(query);
-                System.out.print("\tYou have successfully removed them from your chat\n"); 
+                System.out.print("\tYou have successfully removed them from your chat\n");
             }
             else{
                 System.out.println("\tYou are not the creator of that chat, you cannot remove members\n");
-                return;  
+                return;
             }
        }catch (Exception e) {
            System.out.println(e.getMessage());
@@ -499,21 +499,21 @@ return -1;
    
    //deletes a whole chat if user is intial sender
     public static void DeleteWholeChat(Messenger esql, String chat_id){
-        try{ 
-            String query=String.format("SELECT * FROM CHAT WHERE init_sender='%s' AND chat_id='%s'",SUPER_USER, chat_id); 
-            int check=esql.executeQuery(query); 
+        try{
+            String query=String.format("SELECT * FROM CHAT WHERE init_sender='%s' AND chat_id='%s'",SUPER_USER, chat_id);
+            int check=esql.executeQuery(query);
             if (check<0){
-                System.out.println("\tYou did not create this chat, you can not delete it"); 
+                System.out.println("\tYou did not create this chat, you can not delete it");
             }
             
             else{
                 query = String.format("DELETE FROM chat_list WHERE member = '%s' AND chat_id = '%s'", SUPER_USER, chat_id);
                 esql.executeUpdate(query);
-                System.out.print("\tYou have successfully deleted the chat\n"); 
+                System.out.print("\tYou have successfully deleted the chat\n");
             }
         }
-        catch (Exception e){ 
-            System.err.println(e.getMessage()); 
+        catch (Exception e){
+            System.err.println(e.getMessage());
             }
         }//end Delete Chat
 
@@ -1015,10 +1015,9 @@ String query =
                     media_id = esql.getCurrSeqVal("media_attachment_media_id_seq");
                     break;
                 case 2:
-                    System.out.println("\tSelf Delete message in how many days: ");
+                    System.out.print("\tSelf Delete message in how many days: ");
                     String date = in.readLine();
-                    query = String.format("UPDATE MESSAGE set destr_timestamp = now() + interval('%s' days)",
-                                           date);
+                    query = String.format("UPDATE MESSAGE set destr_timestamp = now() + interval '%s' day", date);
                     esql.executeUpdate(query);
                     break;
                 case 3:
@@ -1076,7 +1075,7 @@ String query =
 
          // System.out.println(noti_rm.size());
           for(int i = 0; i < noti_rm.size(); i++){
-              System.out.println(noti_rm.get(i).get(0));
+              //System.out.println(noti_rm.get(i).get(0));
               String temp = String.format("DELETE FROM notification WHERE usr_login = '%s' AND msg_id = '%s'", SUPER_USER, noti_rm.get(i).get(0));
               esql.executeUpdate(temp);
           }
@@ -1121,7 +1120,7 @@ String query =
    }
 
    //Delete the user if is not an initial sender of any chat
-	public static void DeleteUser(Messenger esql){
+public static void DeleteUser(Messenger esql){
     try{
         String query= String.format("SELECT * FROM CHAT WHERE init_sender='%s'", SUPER_USER);
         int num=esql.executeQuery(query);
